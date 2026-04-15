@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- Prevents zooming and scaling on Android to keep it feeling like an app -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>For Ankitaa 🤞🏻❤️</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -11,18 +12,24 @@
             margin: 0;
             padding: 0;
             font-family: 'Poppins', sans-serif;
+            /* Prevent text highlighting when tapping frantically */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            /* Romantic animated gradient background */
+            /* 100dvh is crucial for Android to handle the dynamic address bar */
+            min-height: 100dvh;
+            width: 100vw;
             background: linear-gradient(-45deg, #ff9a9e, #fecfef, #fbc2eb, #a18cd1);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
-            overflow: hidden; /* Prevents scrollbars when button flies around */
+            overflow: hidden; /* Absolutely no scrollbars allowed */
+            position: relative;
         }
 
         @keyframes gradientBG {
@@ -36,94 +43,98 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 40px 20px;
+            padding: 35px 20px;
             text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
             width: 90%;
-            max-width: 400px;
+            max-width: 380px;
             z-index: 10;
-            transition: transform 0.3s ease;
         }
 
         .gif-container {
             margin-bottom: 20px;
+            min-height: 180px; /* Prevents layout jump when GIF loads */
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .gif-container img {
             width: 180px;
+            height: auto;
             border-radius: 15px;
             pointer-events: none;
         }
 
         h1 {
             color: #ff4d6d;
-            font-size: 1.6rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
             font-weight: 700;
         }
 
         p {
-            color: #555;
-            font-size: 0.95rem;
-            margin-bottom: 30px;
+            color: #444;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            min-height: 24px; /* Keeps height consistent when text changes */
         }
 
-        .buttons {
+        .buttons-container {
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 15px;
-            position: relative; /* Context for the dodging button */
-            height: 50px;
+            height: 50px; /* Fixed height so 'Yes' doesn't jump when 'No' leaves */
+            position: relative;
+            width: 100%;
         }
 
         button {
             border: none;
-            padding: 12px 30px;
-            font-size: 1rem;
+            padding: 12px 25px;
+            font-size: 1.1rem;
             font-weight: 600;
             border-radius: 50px;
             cursor: pointer;
-            transition: all 0.2s ease;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            white-space: nowrap;
         }
 
         .yes-btn {
             background-color: #ff4d6d;
             color: white;
-            z-index: 2;
+            z-index: 5;
+            width: 120px;
         }
 
-        .yes-btn:hover {
-            background-color: #ff2a55;
-            transform: scale(1.05);
+        .yes-btn:active {
+            transform: scale(0.95);
         }
 
         .no-btn {
             background-color: #fff;
             color: #ff4d6d;
             border: 2px solid #ff4d6d;
-            position: absolute; /* Allows it to move freely */
-            left: calc(50% + 10px); /* Initial position next to Yes */
+            width: 120px;
+            z-index: 20;
+            /* touch-action: none ensures Android doesn't try to scroll when tapping it */
+            touch-action: none;
         }
 
-        /* Heart confetti styles */
+        /* Confetti Hearts */
         .heart {
             position: fixed;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             top: -10vh;
-            animation: fall 3s linear forwards;
+            animation: fall linear forwards;
             z-index: 100;
+            pointer-events: none;
         }
 
         @keyframes fall {
-            to { transform: translateY(110vh) rotate(360deg); }
-        }
-
-        /* Mobile specific adjustments */
-        @media (max-width: 480px) {
-            .no-btn {
-                left: calc(50% + 5px);
-            }
+            to { transform: translateY(110dvh) rotate(360deg); }
         }
     </style>
 </head>
@@ -136,7 +147,7 @@
         <h1 id="question">Ankitaa 🤞🏻</h1>
         <p id="subtext">Do you love me? 🥺</p>
         
-        <div class="buttons">
+        <div class="buttons-container">
             <button class="yes-btn" id="yesBtn">Yes ❤️</button>
             <button class="no-btn" id="noBtn">No</button>
         </div>
@@ -148,15 +159,13 @@
         const mainGif = document.getElementById('mainGif');
         const question = document.getElementById('question');
         const subtext = document.getElementById('subtext');
-        const buttonsContainer = document.querySelector('.buttons');
+        const buttonsContainer = document.querySelector('.buttons-container');
 
-        // Array of progressively desperate/cute messages
         const noMessages = [
             "Please think again! 🥺",
             "Ek aur baar Soch lo! 😭",
-            "Are you absolutely sure?",
-            "Beautiful pls Man jao na! 💔",
-            "Kitna code likh waogi? 💻",
+            "Are you sure?",
+            "Man jao na! 💔",
             "You're breaking my heart! 😿",
             "I'm gonna cry now...",
             "Just click YES! 😤"
@@ -164,76 +173,82 @@
 
         let messageIndex = 0;
 
-        // Function to move the "No" button
-        const dodgeButton = () => {
-            // Change GIF to something sad/pleading
+        function dodgeButton() {
+            // Update GIF to sad cat
             mainGif.src = "https://media.tenor.com/hI2HkYg5h3YAAAAi/peach-cat-crying.gif";
             
-            // Update the text
+            // Cycle through pleading messages
             subtext.innerText = noMessages[messageIndex % noMessages.length];
             messageIndex++;
 
-            // Calculate new random position within viewport boundaries
-            const btnWidth = noBtn.offsetWidth;
-            const btnHeight = noBtn.offsetHeight;
-            
-            // Keep button safely inside the screen
-            const maxX = window.innerWidth - btnWidth - 20;
-            const maxY = window.innerHeight - btnHeight - 20;
-
-            const randomX = Math.max(20, Math.floor(Math.random() * maxX));
-            const randomY = Math.max(20, Math.floor(Math.random() * maxY));
-
-            // Apply new coordinates (relative to viewport)
+            // Make the button position absolute to the body
             noBtn.style.position = 'fixed';
+
+            // Calculate safe boundaries so the button STAYS ON SCREEN
+            // window.innerWidth/innerHeight gets the exact screen size
+            // offsetWidth/Height subtracts the button's size
+            // The -20 ensures a 20px safety margin from the screen edges
+            const safeWidth = window.innerWidth - noBtn.offsetWidth - 20;
+            const safeHeight = window.innerHeight - noBtn.offsetHeight - 20;
+
+            // Generate random coordinates within the safe boundaries (minimum 10px from top/left)
+            const randomX = Math.max(10, Math.floor(Math.random() * safeWidth));
+            const randomY = Math.max(10, Math.floor(Math.random() * safeHeight));
+
             noBtn.style.left = `${randomX}px`;
             noBtn.style.top = `${randomY}px`;
-        };
+        }
 
-        // Trigger dodge on both hover (desktop) and touch/click (mobile)
-        noBtn.addEventListener('mouseover', dodgeButton);
-        noBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent accidental mobile clicks
-            dodgeButton();
+        // Handle both desktop mouse movements and Android finger touches
+        // 'touchstart' triggers the moment a finger touches the screen, before a 'click' happens!
+        ['mouseover', 'touchstart'].forEach(eventType => {
+            noBtn.addEventListener(eventType, (e) => {
+                if (eventType === 'touchstart') {
+                    e.preventDefault(); // Prevents the touch from registering as a click on Android
+                }
+                dodgeButton();
+            });
         });
-        noBtn.addEventListener('click', dodgeButton);
 
-        // Function for when she clicks YES
+        // When she finally says YES
         yesBtn.addEventListener('click', () => {
-            // Update UI to success state
+            // Happy UI Update
             mainGif.src = "https://media.tenor.com/TKWbwYg6N2MAAAAi/peach-goma.gif";
             question.innerText = "I knew it! 🥰";
             subtext.innerText = "You love me a lot! ❤️";
             
-            // Hide buttons
+            // Hide the buttons gracefully
             buttonsContainer.style.display = 'none';
+            if(noBtn.style.position === 'fixed') {
+                noBtn.style.display = 'none';
+            }
 
-            // Create falling hearts effect
             createHearts();
 
-            // WhatsApp Redirect Setup
+            // WhatsApp Redirect
             const phoneNumber = "917005966672";
-            // encodeURIComponent ensures emojis and spaces format perfectly for URLs
             const message = encodeURIComponent("I love you Raj 🫣❤️");
             const whatsappURL = `https://wa.me/${phoneNumber}?text=${message}`;
 
-            // Redirect after 2.5 seconds so she can read the happy message
+            // Wait 2.5 seconds to let her enjoy the happy screen, then send to WhatsApp
             setTimeout(() => {
                 window.location.href = whatsappURL;
             }, 2500);
         });
 
-        // Fun little heart confetti function
+        // Generates falling hearts
         function createHearts() {
-            for(let i = 0; i < 30; i++) {
+            for(let i = 0; i < 35; i++) {
                 setTimeout(() => {
                     const heart = document.createElement('div');
                     heart.innerHTML = '❤️';
                     heart.classList.add('heart');
+                    // Random horizontal position
                     heart.style.left = Math.random() * 100 + 'vw';
-                    heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    // Random fall duration between 2s and 4.5s
+                    heart.style.animationDuration = (Math.random() * 2.5 + 2) + 's';
                     document.body.appendChild(heart);
-                }, i * 100);
+                }, i * 120); // Stagger the hearts falling
             }
         }
     </script>
